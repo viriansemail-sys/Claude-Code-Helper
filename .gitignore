@@ -1,0 +1,9 @@
+.mcp.json
+settings.local.json
+*.local.json
+.env
+.env.*
+*.bak
+*.bak.*
+node_modules/
+__pycache__/

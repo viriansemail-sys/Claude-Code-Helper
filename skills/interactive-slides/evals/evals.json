@@ -1,0 +1,223 @@
+{
+  "skill_name": "interactive-slides",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "investor-pitch",
+      "prompt": "I need to pitch my climate tech startup to investors next week. We've raised $500K seed, have 3 paying customers, and our tech reduces industrial CO2 by 40%. Can you make me a killer presentation?",
+      "expected_output": "An interactive investor pitch deck (HTML file) with discovery questions asked first, then a polished slide-based presentation covering: problem, solution, traction, team, ask. Should have animated reveals, strong visual design, and investor-appropriate tone.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "file-exists-and-substantial",
+          "text": "HTML file exists and is at least 5KB (not a skeleton/placeholder)"
+        },
+        {
+          "id": "key-sections-present",
+          "text": "Presentation covers key investor pitch sections: problem, solution, traction/customers, and either team or ask/funding"
+        },
+        {
+          "id": "specific-data-points",
+          "text": "Specific data points from the prompt are present: $500K seed, 3 paying customers, 40% CO2 reduction"
+        },
+        {
+          "id": "navigation-functional",
+          "text": "Presentation has keyboard or click navigation (arrow keys or clickable controls)"
+        },
+        {
+          "id": "has-animations",
+          "text": "Presentation includes animations or transitions (GSAP, CSS animations, or similar)"
+        },
+        {
+          "id": "visually-designed",
+          "text": "Has clear visual design intent: custom colors, typography choices, layout — not just default HTML styling"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "async-roadmap",
+      "prompt": "I have a product roadmap I want to share with my team. Here it is:\n\n# Q3 Product Roadmap\n\n## Theme: Platform Stability & Growth\n\n**July**\n- Launch new API v2 (breaking changes, migration guide ready)\n- Fix top 10 customer-reported bugs\n- Onboard 2 new enterprise accounts\n\n**August**\n- Release mobile app redesign\n- Add SSO/SAML support (top enterprise request)\n- Internal hackathon: AI features exploration\n\n**September**\n- Launch AI-powered search (beta)\n- Public launch of partner API\n- Q4 planning kickoff\n\n## Key Metrics We're Targeting\n- 99.9% uptime\n- 40% reduction in P1 bugs\n- 3 new enterprise logos\n\nTurn this into something I can share with my team async — something that feels more engaging than a Google Doc.",
+      "expected_output": "An engaging async-friendly web presentation (HTML file) — likely scroll-based storytelling. Should transform the raw outline into a compelling narrative, not just echo bullets. Should feel designed, not like a document converted to slides.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "file-exists-and-substantial",
+          "text": "HTML file exists and is at least 5KB (not a skeleton/placeholder)"
+        },
+        {
+          "id": "all-months-present",
+          "text": "All 3 months of roadmap content are present: July, August, and September items"
+        },
+        {
+          "id": "key-metrics-included",
+          "text": "Key metrics are present: 99.9% uptime, 40% bug reduction, and/or 3 new enterprise logos"
+        },
+        {
+          "id": "async-friendly",
+          "text": "Presentation is self-navigable for async viewing (scroll-based OR slide-based with visible navigation controls)"
+        },
+        {
+          "id": "content-transformed",
+          "text": "Content is narratively transformed — not just bullet points echoed verbatim. Includes headings, context, or visual structure beyond a list."
+        },
+        {
+          "id": "visually-designed",
+          "text": "Has clear visual design intent: custom colors, typography choices, layout — not just default HTML styling"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "eval_name": "brand-kit-application",
+      "prompt": "I need a presentation for our company all-hands next week. Our brand colors are: primary #1A1A2E, accent #E94560, surface #16213E, text #EAEAEA. Font is Montserrat for headings, Open Sans for body. The presentation covers our Q2 results: revenue up 28% YoY, launched 3 new product features, grew the team from 42 to 61 people, and our Q3 priorities are: expand into EU market, launch mobile app, hire 15 engineers.",
+      "expected_output": "A slide deck (HTML file) using the user's brand kit colors and fonts — not a preset. CSS :root block should use the provided hex values mapped to --bg, --accent, --text-primary, --surface, etc. Fonts should be Montserrat + Open Sans loaded from Google Fonts. Content should cover Q2 results and Q3 priorities with appropriate data visualization.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "file-exists-and-substantial",
+          "text": "HTML file exists and is at least 5KB"
+        },
+        {
+          "id": "brand-colors-applied",
+          "text": "CSS :root block contains the user's hex values (#1A1A2E, #E94560, #16213E) — not default preset colors"
+        },
+        {
+          "id": "brand-fonts-applied",
+          "text": "Montserrat and/or Open Sans are loaded and used — not Inter, Roboto, or a preset font"
+        },
+        {
+          "id": "q2-metrics-present",
+          "text": "Key Q2 metrics are present: 28% revenue growth, 3 product features, team growth from 42 to 61"
+        },
+        {
+          "id": "q3-priorities-present",
+          "text": "Q3 priorities are covered: EU expansion, mobile app, hiring 15 engineers"
+        },
+        {
+          "id": "navigation-functional",
+          "text": "Presentation has keyboard or click navigation"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "eval_name": "scroll-story-async",
+      "prompt": "I want to share our annual sustainability report with stakeholders as something more engaging than a PDF. Here's the content:\n\n**2024 Sustainability Report — GreenCore**\n\nCarbon footprint reduced by 34% since 2020. Renewable energy now powers 78% of our operations. Planted 1.2 million trees through our reforestation partnership. Zero landfill waste achieved in 6 of our 9 facilities. Employee volunteering hours: 14,000 hours in 2024, up from 9,200 in 2023. Supply chain: 91% of tier-1 suppliers now meet our ethical sourcing standards. Goal for 2025: carbon neutral across all facilities.\n\nThis will be shared as a URL — people will read it on their own.",
+      "expected_output": "A scroll-based story (Mode B) HTML file — not a slide deck. Should use GSAP ScrollTrigger for scroll-triggered animations, include a reading progress bar, and transform the raw sustainability data into a compelling narrative arc. Sections should reveal content as the user scrolls. No scaleToViewport() — this is a full-page document.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "file-exists-and-substantial",
+          "text": "HTML file exists and is at least 6KB"
+        },
+        {
+          "id": "scroll-mode-not-slide-mode",
+          "text": "Presentation uses scroll-based layout (min-height: 100vh sections or similar) — NOT fixed-position slides with keyboard navigation as the primary mechanic"
+        },
+        {
+          "id": "scrolltrigger-used",
+          "text": "GSAP ScrollTrigger is registered and used for scroll-triggered content reveals"
+        },
+        {
+          "id": "no-viewport-scaling",
+          "text": "Does NOT contain scaleToViewport() or a fixed 1280x720 canvas — scroll stories are full-page documents"
+        },
+        {
+          "id": "key-metrics-present",
+          "text": "Key sustainability metrics are present: 34% carbon reduction, 78% renewable energy, 1.2M trees, 14,000 volunteer hours"
+        },
+        {
+          "id": "progress-indicator",
+          "text": "Includes a reading progress bar or equivalent scroll position indicator"
+        },
+        {
+          "id": "visually-designed",
+          "text": "Has clear visual design intent: custom colors, typography, layout — not default HTML styling"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "eval_name": "executive-interview-star",
+      "prompt": "I have an interview with a Head of Growth next week. Here's my STAR story — can you turn it into a presentation?\n\nS – When I joined Snap to lead strategy, operations and analytics for the SMB organization, our ads revenue was primarily managed by in-house account managers. As we expanded into vendor sales and scaled marketing, our growth hit an operational ceiling. Leads were coming in from everywhere — manual spreadsheets, Ads Manager signups, scraped lists, third-party vendor data. The ops team was manually cleaning and deduping leads, enriching them by Googling companies, then uploading spreadsheets to SFDC. There was no consistent definition of a qualified lead, no prioritization logic, and no lifecycle tracking. As lead volume grew, this manual model became the bottleneck to scaling SMB revenue. Leadership wanted better prioritization and efficiency, and visibility into funnel performance.\n\nT – As the first hire with a technical and analytics background, I proposed building a lead scoring engine — framed not just as a modeling project but as a scalable lead operating system: aggregate and standardize fragmented sources, enrich leads with meaningful signals, prioritize across GTM channels based on forecasted conversion and revenue, and track performance down the lifecycle. At the time I had no dedicated headcount — this was a zero-to-one build under high ambiguity.\n\nA – I approached this in four phases: executive framing, strategic decisions, system design, and cross-functional execution.\n\nFirst, I reframed the problem at the executive level — not as a data science initiative but as an operational constraint limiting SMB revenue growth. I quantified lead volume growth vs. sales capacity, conversion variance by source, and revenue concentration. This shifted the conversation from 'analytics improvement' to 'growth unlock' and secured VP-level sponsorship, Accenture for engineering and DS support, and EverString for enrichment data.\n\nSecond, I made three structural decisions: (1) Build vs Buy — chose hybrid, vendor for enrichment + in-house scoring for long-term control. (2) Defined 'high-value lead' as conversion plus sustained ad spend 56 days post-conversion, aligning the model to durable revenue. (3) Selected Random Forest for robustness across heterogeneous features and interpretability.\n\nThird, I designed a five-layer pipeline: centralized lead ingestion, external and internal enrichment, standardized feature engineering, Random Forest scoring engine, and CRM integration with automated routing and a feedback loop.\n\nFourth, I led a 20+ offshore team in India for data engineering and model implementation, plus an onsite data scientist. I also partnered closely with marketing and sales to align routing rules with team incentives, incorporate AM insights into feature design, and build dashboards tracking conversion and revenue by source.\n\nR – Within one quarter: all major lead sources centralized, scoring and routing fully automated, manual spreadsheet workflows eliminated, conversion rate increased among prioritized leads, and full-funnel visibility established for the first time. The infrastructure later became the foundation for Snap's broader marketing and sales systems.\n\nThe audience is an executive interviewer — Head of Growth. This will be a live virtual presentation. I don't have a brand kit.",
+      "expected_output": "A polished 8-10 slide live presentation (Mode A, slide deck) built for an executive interviewer. Style should be authoritative and restrained — not a fluid/colorful SaaS aesthetic. Density should be lean-to-medium: labels and key terms, not prose paragraphs. Content should follow STAR structure: Situation → Task → Action (multiple phases) → Result → Growth lens. Key facts must be preserved: Snap SMB context, 4-phase action structure, 56-day spend definition, Random Forest, 20+ offshore team, one-quarter delivery. Must include viewport scaling, all navigation methods, and navigation dots.",
+      "files": ["/Users/sylvial/workspace/index.html"],
+      "assertions": [
+        {
+          "id": "file-exists-and-substantial",
+          "text": "HTML file exists and is at least 10KB — STAR content with 8+ slides warrants significant markup"
+        },
+        {
+          "id": "authoritative-style-chosen",
+          "text": "Visual style is dark/restrained (dark background color like #0d0d0d or similar near-black, with a muted accent) — not a bright/colorful or gradient-heavy aesthetic, which would be inappropriate for an executive interview"
+        },
+        {
+          "id": "star-structure-present",
+          "text": "Presentation follows STAR structure: slides or sections covering Situation, Task, Action, and Result are all present"
+        },
+        {
+          "id": "action-phases-broken-out",
+          "text": "Action section is broken into multiple phases (buy-in, decisions, architecture/system, execution) — not collapsed into a single slide"
+        },
+        {
+          "id": "key-facts-preserved",
+          "text": "Key facts from the source are present: Snap SMB, lead scoring, 56-day spend definition OR Random Forest OR 20+ offshore team — at least two of these specific details appear"
+        },
+        {
+          "id": "lean-to-medium-density",
+          "text": "Slides use labels and short phrases as the primary content unit — not full prose paragraphs. Body text per card or bullet should be 1-2 lines max."
+        },
+        {
+          "id": "growth-lens-slide",
+          "text": "Includes a closing slide with growth leadership takeaways or lessons — not just results"
+        },
+        {
+          "id": "viewport-scaling-present",
+          "text": "JavaScript contains scaleToViewport() function and listens for resize and fullscreenchange events"
+        },
+        {
+          "id": "navigation-functional",
+          "text": "Presentation supports keyboard navigation (ArrowRight/ArrowLeft or Space) and click-zone navigation"
+        },
+        {
+          "id": "navigation-dots-present",
+          "text": "Visual navigation dots are present — built dynamically, one per slide, with an active state indicator"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "sql-training",
+      "prompt": "Make me a training presentation about SQL joins for junior developers. It should include a quiz at the end and examples they can interact with.",
+      "expected_output": "An interactive training presentation (HTML file) covering SQL join types (INNER, LEFT, RIGHT, FULL OUTER) with visual diagrams, real examples, and an interactive quiz at the end. Should use interactive mode with engaging code examples.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "file-exists-and-substantial",
+          "text": "HTML file exists and is at least 8KB (training content requires more depth)"
+        },
+        {
+          "id": "all-four-join-types",
+          "text": "All 4 SQL join types are covered: INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN"
+        },
+        {
+          "id": "visual-diagrams",
+          "text": "Includes visual diagrams or illustrations for joins (Venn diagrams, table visualizations, or similar)"
+        },
+        {
+          "id": "interactive-quiz-present",
+          "text": "Has an interactive quiz section (not just a static list of questions — requires clickable elements)"
+        },
+        {
+          "id": "quiz-gives-feedback",
+          "text": "Quiz provides feedback when user answers (correct/incorrect response, not just a submit button)"
+        },
+        {
+          "id": "code-examples",
+          "text": "Includes SQL code examples showing actual JOIN syntax"
+        }
+      ]
+    }
+  ]
+}

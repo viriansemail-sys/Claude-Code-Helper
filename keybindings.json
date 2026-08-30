@@ -1,0 +1,29 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-keybindings.json",
+  "$docs": "https://code.claude.com/docs/en/keybindings",
+  "bindings": [
+    {
+      "context": "Global",
+      "bindings": {
+        "ctrl+t": "app:toggleTodos",
+        "ctrl+o": "app:toggleTranscript"
+      }
+    },
+    {
+      "context": "Chat",
+      "bindings": {
+        "ctrl+e": "chat:externalEditor",
+        "ctrl+s": "chat:stash",
+        "meta+p": "chat:modelPicker",
+        "meta+t": "chat:thinkingToggle",
+        "ctrl+g": null
+      }
+    },
+    {
+      "context": "Task",
+      "bindings": {
+        "ctrl+b": "task:background"
+      }
+    }
+  ]
+}

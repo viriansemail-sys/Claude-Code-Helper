@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manim Video Viewer</title>
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-surface: #212121;
+            --bg-hover: #3f3f3f;
+            --bg-active: #4f4f4f;
+            --accent: #1E88E5;
+            --accent-hover: #1976D2;
+            --text-primary: #fff;
+            --text-secondary: #aaa;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-menu: 0 4px 16px rgba(0,0,0,0.5);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "Roboto", Arial, sans-serif; background: var(--bg-dark); color: var(--text-primary); height: 100vh; overflow: hidden; }
+        .container { display: flex; height: 100vh; gap: 12px; padding: 24px; }
+        .video-section { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; }
+        .video-wrapper { flex: 1; background: #000; border-radius: var(--radius-lg) var(--radius-lg) 0 0; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+        .preview-panel video { flex: 1; width: 100%; object-fit: contain; cursor: pointer; }
+        .preview-panel { position: relative; }
+
+        /* Base button */
+        .btn { background: transparent; border: none; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); }
+        .btn:hover { background: rgba(255,255,255,0.1); }
+        .btn-primary { background: var(--accent); color: var(--text-primary); }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-cancel { background: var(--bg-hover); color: var(--text-primary); }
+        .btn-cancel:hover { background: var(--bg-active); }
+
+        /* Progress bar */
+        .progress-bar { position: absolute; bottom: 40px; left: 12px; right: 12px; height: 20px; cursor: pointer; z-index: 10; display: flex; align-items: center; }
+        .progress-track { width: 100%; height: 3px; background: var(--bg-dark); display: flex; gap: 3px; border-radius: 2px; overflow: hidden; transition: height 0.1s; }
+        .progress-bar:hover .progress-track { height: 5px; }
+        .chapter-segment { height: 100%; background: rgba(255,255,255,0.3); }
+        .chapter-segment-fill { height: 100%; background: #f00; width: 0; }
+        .progress-dot { position: absolute; top: 50%; width: 13px; height: 13px; background: #f00; border-radius: 50%; transform: translateY(-50%) scale(0); transition: transform 0.1s; pointer-events: none; }
+        .progress-bar:hover .progress-dot, .progress-bar.dragging .progress-dot { transform: translateY(-50%) scale(1); }
+
+        /* Controls */
+        .controls { display: none; align-items: center; gap: 8px; padding: 8px 12px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); position: absolute; bottom: 0; left: 0; right: 0; }
+        .preview-panel.active ~ .controls { display: flex; }
+        .play-btn { width: 40px; height: 40px; border-radius: 50%; }
+        .ctrl-btn { width: 36px; height: 36px; }
+        .play-btn svg, .ctrl-btn svg { fill: var(--text-primary); }
+        .play-btn svg { width: 24px; height: 24px; }
+        .ctrl-btn svg { width: 20px; height: 20px; }
+        .ctrl-btn.active { background: rgba(255,255,255,0.2); }
+        .time { font-size: 13px; margin-left: 4px; }
+        .time .sep { color: var(--text-secondary); margin: 0 4px; }
+        .spacer { flex: 1; }
+
+        /* Subtitle overlay */
+        .subtitle-overlay { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; max-width: 80%; z-index: 5; }
+        .subtitle-text { background: rgba(0,0,0,0.75); color: var(--text-primary); padding: 6px 16px; border-radius: var(--radius-sm); display: inline-block; font-family: Arial, sans-serif; line-height: 1.4; }
+        .subtitle-text:empty { display: none; }
+        .subtitle-text.size-small { font-size: 16px; }
+        .subtitle-text.size-medium { font-size: 24px; }
+        .subtitle-text.size-large { font-size: 36px; }
+
+        /* Menu surface (shared for dropdown, submenu, chapter-dropdown) */
+        .menu-surface { position: absolute; background: var(--bg-surface); border-radius: var(--radius-md); padding: 8px 0; display: none; box-shadow: var(--shadow-menu); z-index: 20; }
+        .menu-surface.open { display: block; }
+        .menu-wrap { position: relative; }
+        .dropdown-menu { bottom: 100%; right: 0; min-width: 140px; margin-bottom: 8px; }
+        .dropdown-menu.settings { min-width: 180px; }
+        .menu-opt { padding: 8px 16px; cursor: pointer; font-size: 14px; display: flex; align-items: center; }
+        .menu-opt:hover { background: rgba(255,255,255,0.1); }
+        .menu-opt .check { width: 20px; margin-right: 4px; opacity: 0; }
+        .menu-opt.active .check { opacity: 1; }
+        .menu-opt .arrow { margin-left: auto; font-size: 12px; color: var(--text-secondary); }
+        .menu-divider { height: 1px; background: var(--bg-hover); margin: 8px 0; }
+        .submenu { left: -100%; bottom: 0; min-width: 140px; }
+
+        /* Download modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--bg-surface); border-radius: var(--radius-lg); padding: 24px; min-width: 320px; }
+        .modal h3 { font-size: 18px; margin-bottom: 16px; }
+        .modal-opts { display: flex; flex-direction: column; gap: 8px; }
+        .modal-opt { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #2a2a2a; border-radius: var(--radius-md); cursor: pointer; border: 2px solid transparent; }
+        .modal-opt:hover { border-color: var(--bg-hover); }
+        .modal-opt.selected { border-color: var(--accent); }
+        .modal-opt .info { flex: 1; }
+        .modal-opt .label { font-size: 14px; font-weight: 500; }
+        .modal-opt .desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .modal-opt .radio { width: 18px; height: 18px; border: 2px solid #666; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .modal-opt.selected .radio { border-color: var(--accent); }
+        .modal-opt.selected .radio::after { content: ''; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; }
+        .modal-btns { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+        .modal-btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal-progress { margin-top: 16px; display: none; }
+        .modal-progress.show { display: block; }
+        .modal-progress .bar { height: 4px; background: var(--bg-hover); border-radius: 2px; overflow: hidden; }
+        .modal-progress .fill { height: 100%; background: var(--accent); width: 0; transition: width 0.3s; }
+        .modal-progress .status { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+
+        /* Chapter dropdown */
+        .chapter-dropdown-container { position: relative; }
+        .scene-name { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; cursor: pointer; }
+        .scene-name:hover { color: var(--text-secondary); }
+        .scene-name::after { content: ' ▼'; font-size: 10px; }
+        .chapter-dropdown { bottom: 100%; left: 0; min-width: 260px; margin-bottom: 8px; max-height: 300px; overflow-y: auto; }
+        .chapter-dropdown::-webkit-scrollbar { width: 8px; }
+        .chapter-dropdown::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: var(--radius-sm); }
+        .chapter-item { padding: 10px 16px; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .chapter-item:hover { background: rgba(255,255,255,0.1); }
+        .chapter-item.active { background: rgba(255,255,255,0.15); }
+        .chapter-item .ch-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .chapter-item .ch-time { color: var(--text-secondary); font-size: 12px; margin-left: 12px; }
+
+        /* Resizer */
+        .resizer { width: 6px; background: transparent; cursor: col-resize; position: relative; flex-shrink: 0; margin: 0 -3px; z-index: 10; }
+        .resizer::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 40px; background: var(--bg-hover); border-radius: 2px; opacity: 0; transition: opacity 0.2s; }
+        .resizer:hover::after, .resizer.active::after { opacity: 1; }
+        .resizer:hover, .resizer.active { background: rgba(30, 136, 229, 0.2); }
+        body.resizing { cursor: col-resize; user-select: none; }
+        body.resizing video, body.resizing .feedback-panel { pointer-events: none; }
+
+        /* Content tabs */
+        .content-tabs { display: flex; gap: 8px; padding: 8px 16px; background: #1a1a1a; }
+        .content-tab { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; background: transparent; color: #9CA3AF; transition: all 0.15s; }
+        .content-tab:hover { color: #d1d5db; }
+        .content-tab.active { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+
+        /* Content panels */
+        .content-panel { display: none; flex: 1; overflow: auto; background: var(--bg-dark); position: relative; }
+        .content-panel.active { display: flex; flex-direction: column; }
+        .content-panel.plan-panel, .content-panel.code-panel { background: #121212; }
+        .content-panel.preview-panel { background: #000; }
+
+        /* Plan panel (markdown) */
+        .plan-content { padding: 24px; color: #e5e7eb; line-height: 1.7; font-size: 15px; }
+        .plan-content h1 { font-size: 24px; font-weight: 600; margin: 0 0 16px; color: var(--text-primary); border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .plan-content h2 { font-size: 20px; font-weight: 600; margin: 24px 0 12px; color: var(--text-primary); }
+        .plan-content h3 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; color: var(--text-primary); }
+        .plan-content p { margin: 0 0 12px; }
+        .plan-content ul, .plan-content ol { margin: 0 0 12px; padding-left: 24px; }
+        .plan-content li { margin: 4px 0; }
+        .plan-content code { background: #272727; padding: 2px 6px; border-radius: var(--radius-sm); font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; }
+        .plan-content pre { background: #1e1e1e; padding: 16px; border-radius: var(--radius-md); overflow-x: auto; margin: 0 0 16px; }
+        .plan-content pre code { background: transparent; padding: 0; }
+        .plan-content blockquote { border-left: 3px solid var(--bg-hover); padding-left: 16px; margin: 0 0 12px; color: #9ca3af; }
+        .plan-content strong { color: var(--text-primary); }
+        .plan-content a { color: #60a5fa; text-decoration: none; }
+        .plan-content a:hover { text-decoration: underline; }
+        .plan-content hr { border: none; border-top: 1px solid #333; margin: 24px 0; }
+
+        /* Code panel */
+        .code-content { padding: 0; margin: 0; background: #1e1e1e; color: #d4d4d4; font-family: 'Monaco', 'Menlo', 'Consolas', monospace; font-size: 13px; line-height: 1.6; overflow: auto; flex: 1; }
+        .code-content pre { margin: 0; padding: 16px; }
+        .code-line { display: flex; }
+        .code-line:hover { background: rgba(255,255,255,0.03); }
+        .line-number { color: #6e7681; text-align: right; padding-right: 16px; min-width: 50px; user-select: none; }
+        .line-content { flex: 1; white-space: pre; }
+        .hl-keyword { color: #c586c0; }
+        .hl-string { color: #ce9178; }
+        .hl-comment { color: #6a9955; }
+        .hl-function { color: #dcdcaa; }
+        .hl-class { color: #4ec9b0; }
+        .hl-number { color: #b5cea8; }
+        .hl-decorator { color: #d7ba7d; }
+        .hl-builtin { color: #4fc1ff; }
+
+        /* Empty state */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: #6b7280; padding: 40px; text-align: center; }
+        .empty-state svg { width: 48px; height: 48px; fill: #4b5563; margin-bottom: 16px; }
+        .empty-state p { font-size: 14px; }
+
+        /* Feedback panel */
+        .feedback-panel { width: 320px; min-width: 200px; max-width: 600px; display: flex; flex-direction: column; overflow: hidden; background: #181818; border-radius: var(--radius-lg); padding: 16px; }
+        .feedback-textarea { flex: 1; background: #272727; border: none; color: var(--text-primary); padding: 12px; border-radius: var(--radius-md); font-size: 14px; font-family: inherit; line-height: 1.6; outline: none; resize: none; }
+        .feedback-textarea:focus { box-shadow: 0 0 0 2px var(--accent); }
+        .feedback-textarea::placeholder { color: #666; }
+        .feedback-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .feedback-btn { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .feedback-btn.copy { background: var(--accent); color: var(--text-primary); }
+        .feedback-btn.copy:hover { background: var(--accent-hover); }
+        .shortcuts { font-size: 12px; color: var(--text-secondary); padding: 12px 0; border-top: 1px solid var(--bg-hover); margin-top: 12px; }
+        .shortcuts kbd { background: #272727; padding: 3px 8px; border-radius: var(--radius-sm); font-family: inherit; font-size: 11px; margin-right: 4px; }
+
+        /* Action buttons below video */
+        .video-actions { display: flex; gap: 8px; padding: 12px 16px; background: #181818; border-radius: 0 0 var(--radius-lg) var(--radius-lg); flex-wrap: wrap; align-items: center; }
+        .action-btn { display: flex; align-items: center; gap: 6px; background: #272727; border: none; color: var(--text-primary); padding: 8px 14px; border-radius: 18px; cursor: pointer; font-size: 13px; font-weight: 500; }
+        .action-btn:hover { background: var(--bg-hover); }
+        .action-btn svg { width: 16px; height: 16px; fill: currentColor; }
+        .action-btn.add-btn { padding: 8px 12px; font-size: 16px; }
+        #customButtons { display: contents; }
+        .custom-btn-wrap { position: relative; }
+        .custom-btn-wrap .remove-btn { display: none; position: absolute; right: -4px; top: -4px; width: 16px; height: 16px; background: #f44; border: none; border-radius: 50%; color: var(--text-primary); font-size: 10px; cursor: pointer; align-items: center; justify-content: center; }
+        .custom-btn-wrap:hover .remove-btn { display: flex; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="feedback-panel">
+            <textarea class="feedback-textarea" id="feedbackTextarea" placeholder="Click 'Insert Timestamp' while watching to add timestamps here..."></textarea>
+            <div class="feedback-actions">
+                <button class="feedback-btn copy" id="copyAllBtn">Copy</button>
+            </div>
+            <div class="shortcuts"><kbd>Space</kbd> Play/Pause <kbd>C</kbd> Subtitles <kbd>T</kbd> Insert timestamp</div>
+        </div>
+        <div class="resizer" id="resizer"></div>
+        <div class="video-section">
+            <div class="video-wrapper">
+                <div class="content-tabs">
+                    <button class="content-tab" data-tab="plan">Plan</button>
+                    <button class="content-tab" data-tab="code">Code</button>
+                    <button class="content-tab active" data-tab="preview">Preview</button>
+                </div>
+                <div class="content-panel plan-panel" id="planPanel">
+                    <div class="plan-content" id="planContent">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                            <p>No plan.md found</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-panel code-panel" id="codePanel">
+                    <div class="code-content" id="codeContent">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                            <p>No cscript.py found</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-panel preview-panel active" id="previewPanel">
+                    <video id="video" src="/video.mp4"></video>
+                    <div class="subtitle-overlay"><div class="subtitle-text size-medium" id="subtitleText"></div></div>
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-track" id="progressTrack"></div>
+                        <div class="progress-dot" id="progressDot"></div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button class="btn play-btn" id="playBtn">
+                        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg id="pauseIcon" viewBox="0 0 24 24" hidden><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        <svg id="replayIcon" viewBox="0 0 24 24" hidden><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                    </button>
+                    <div class="time"><span id="curTime">0:00</span><span class="sep">/</span><span id="durTime">0:00</span></div>
+                    <div class="chapter-dropdown-container">
+                        <div class="scene-name" id="sceneName">-</div>
+                        <div class="menu-surface chapter-dropdown" id="chapterDropdown"></div>
+                    </div>
+                    <div class="spacer"></div>
+                    <button class="btn ctrl-btn" id="ccBtn" title="Subtitles" hidden>
+                        <svg viewBox="0 0 24 24"><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2V13H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2V13H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></svg>
+                    </button>
+                    <div class="menu-wrap">
+                        <button class="btn ctrl-btn" id="settingsBtn" title="Settings">
+                            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                        </button>
+                        <div class="menu-surface dropdown-menu settings" id="settingsMenu">
+                            <div class="menu-opt" data-submenu="fontSizeMenu"><span>Subtitle size</span><span class="arrow">›</span></div>
+                            <div class="menu-surface submenu" id="fontSizeMenu">
+                                <div class="menu-opt" data-size="small"><span class="check">✓</span>Small</div>
+                                <div class="menu-opt active" data-size="medium"><span class="check">✓</span>Medium</div>
+                                <div class="menu-opt" data-size="large"><span class="check">✓</span>Large</div>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="menu-opt" data-submenu="speedMenu"><span>Playback speed</span><span class="arrow">›</span></div>
+                            <div class="menu-surface submenu" id="speedMenu"></div>
+                        </div>
+                    </div>
+                    <button class="btn ctrl-btn" id="downloadBtn" title="Download">
+                        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="video-actions">
+                <button class="action-btn" id="insertTimestampBtn">
+                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                    Insert Timestamp
+                </button>
+                <div id="customButtons"></div>
+                <button class="action-btn add-btn" id="addCustomBtn" title="Add custom button">+</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="downloadModal">
+        <div class="modal">
+            <h3>Download video</h3>
+            <div class="modal-opts">
+                <div class="modal-opt selected" data-quality="low">
+                    <div class="radio"></div>
+                    <div class="info"><div class="label">Low quality (480p)</div><div class="desc">Current preview, instant download</div></div>
+                </div>
+                <div class="modal-opt" data-quality="high">
+                    <div class="radio"></div>
+                    <div class="info"><div class="label">High quality (1080p)</div><div class="desc">Re-renders, may take a few minutes</div></div>
+                </div>
+            </div>
+            <div class="modal-progress" id="downloadProgress">
+                <div class="bar"><div class="fill" id="progressFill"></div></div>
+                <div class="status" id="progressStatus">Preparing...</div>
+            </div>
+            <div class="modal-btns">
+                <button class="modal-btn btn-cancel" id="downloadCancel">Cancel</button>
+                <button class="modal-btn btn-primary" id="downloadConfirm">Download</button>
+            </div>
+        </div>
+    </div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+const video = $('video'), progressBar = $('progressBar'), settingsMenu = $('settingsMenu'), downloadModal = $('downloadModal');
+
+let chapters = [], subtitles = [];
+let ended = false, subtitlesOn = false;
+
+// Cached DOM elements
+const els = {
+    curTime: $('curTime'), durTime: $('durTime'), sceneName: $('sceneName'),
+    playIcon: $('playIcon'), pauseIcon: $('pauseIcon'), replayIcon: $('replayIcon'),
+    progressDot: $('progressDot'), subtitleText: $('subtitleText')
+};
+
+const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const getChapter = t => chapters.findLast(c => t >= c.start) || chapters[0];
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+const seekBy = delta => { video.currentTime = clamp(video.currentTime + delta, 0, video.duration); ended = false; updateUI(); };
+
+// Unified drag handler
+const makeDraggable = (trigger, onDrag, onEnd = null, activeClass = 'dragging') => {
+    let active = false;
+    trigger.addEventListener('mousedown', e => { active = true; trigger.classList.add(activeClass); onDrag(e); e.preventDefault(); });
+    document.addEventListener('mousemove', e => active && onDrag(e));
+    document.addEventListener('mouseup', () => { if (active) { active = false; trigger.classList.remove(activeClass); onEnd?.(); } });
+};
+
+// Menu selection helper
+const selectOption = (container, selector, activeClass, onSelect) => {
+    container.addEventListener('click', e => {
+        const opt = e.target.closest(selector);
+        if (!opt) return;
+        container.querySelectorAll(selector).forEach(o => o.classList.remove(activeClass));
+        opt.classList.add(activeClass);
+        onSelect(opt);
+    });
+};
+
+// Generic text loader
+const loadText = async (url, container, transform) => {
+    try {
+        const res = await fetch(url);
+        if (res.ok) container.innerHTML = transform(await res.text());
+    } catch (e) { console.error(e); }
+};
+
+function parseSRT(text) {
+    return text.trim().split(/\n\n+/).map(block => {
+        const lines = block.split('\n');
+        const m = lines[1]?.match(/(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/);
+        return m ? { start: +m[1]*3600 + +m[2]*60 + +m[3] + +m[4]/1000, end: +m[5]*3600 + +m[6]*60 + +m[7] + +m[8]/1000, text: lines.slice(2).join('\n') } : null;
+    }).filter(Boolean);
+}
+
+function parseMarkdown(md) {
+    let html = esc(md);
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => `<pre><code>${code.trim()}</code></pre>`);
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    html = html.replace(/^---$/gm, '<hr>');
+    html = html.replace(/^(\s*)[-*] (.+)$/gm, '$1<li>$2</li>');
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>');
+    html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+    html = html.split('\n\n').map(p => {
+        p = p.trim();
+        if (!p || p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<ol') || p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr')) return p;
+        return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+    }).join('\n');
+    return html;
+}
+
+function highlightPython(code) {
+    const keywords = new Set(['def', 'class', 'if', 'elif', 'else', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'import', 'from', 'return', 'yield', 'raise', 'pass', 'break', 'continue', 'and', 'or', 'not', 'in', 'is', 'lambda', 'True', 'False', 'None', 'self', 'async', 'await']);
+    const builtins = new Set(['print', 'range', 'len', 'str', 'int', 'float', 'list', 'dict', 'set', 'tuple', 'super', 'isinstance', 'type', 'open', 'enumerate', 'zip', 'map', 'filter', 'sorted', 'reversed', 'min', 'max', 'sum', 'abs', 'any', 'all']);
+
+    return code.split('\n').map((line, lineNum) => {
+        let result = '', i = 0;
+        while (i < line.length) {
+            if (line.slice(i, i + 3) === '"""' || line.slice(i, i + 3) === "'''") {
+                const quote = line.slice(i, i + 3);
+                let end = line.indexOf(quote, i + 3);
+                if (end === -1) end = line.length - 3;
+                result += `<span class="hl-string">${esc(line.slice(i, end + 3))}</span>`;
+                i = end + 3;
+            } else if (line[i] === '"' || line[i] === "'") {
+                const quote = line[i];
+                let j = i + 1;
+                while (j < line.length && (line[j] !== quote || line[j - 1] === '\\')) j++;
+                result += `<span class="hl-string">${esc(line.slice(i, j + 1))}</span>`;
+                i = j + 1;
+            } else if (line[i] === '#') {
+                result += `<span class="hl-comment">${esc(line.slice(i))}</span>`;
+                break;
+            } else if (line[i] === '@' && /\w/.test(line[i + 1] || '')) {
+                let j = i + 1;
+                while (j < line.length && /\w/.test(line[j])) j++;
+                result += `<span class="hl-decorator">${esc(line.slice(i, j))}</span>`;
+                i = j;
+            } else if (/\d/.test(line[i]) && (i === 0 || !/\w/.test(line[i - 1]))) {
+                let j = i;
+                while (j < line.length && /[\d.]/.test(line[j])) j++;
+                result += `<span class="hl-number">${esc(line.slice(i, j))}</span>`;
+                i = j;
+            } else if (/[a-zA-Z_]/.test(line[i])) {
+                let j = i;
+                while (j < line.length && /\w/.test(line[j])) j++;
+                const word = line.slice(i, j), nextChar = line[j] || '';
+                if (keywords.has(word)) result += `<span class="hl-keyword">${esc(word)}</span>`;
+                else if (builtins.has(word) && nextChar === '(') result += `<span class="hl-builtin">${esc(word)}</span>`;
+                else if (i >= 4 && line.slice(i - 4, i) === 'def ') result += `<span class="hl-function">${esc(word)}</span>`;
+                else if (i >= 6 && line.slice(i - 6, i) === 'class ') result += `<span class="hl-class">${esc(word)}</span>`;
+                else result += esc(word);
+                i = j;
+            } else {
+                result += esc(line[i]);
+                i++;
+            }
+        }
+        return `<div class="code-line"><span class="line-number">${lineNum + 1}</span><span class="line-content">${result || ' '}</span></div>`;
+    }).join('');
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.content-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.content-panel').forEach(p => p.classList.toggle('active', p.id === tab + 'Panel'));
+}
+
+function updateUI() {
+    const t = video.currentTime, d = video.duration || 1, ch = getChapter(t);
+    els.curTime.textContent = fmt(t);
+    els.durTime.textContent = fmt(d);
+    els.sceneName.textContent = ch?.name || '-';
+    document.querySelectorAll('.chapter-item').forEach((el, i) => el.classList.toggle('active', i === ch?.index));
+
+    els.playIcon.style.display = !ended && video.paused ? 'block' : 'none';
+    els.pauseIcon.style.display = !ended && !video.paused ? 'block' : 'none';
+    els.replayIcon.style.display = ended ? 'block' : 'none';
+
+    chapters.forEach((c, i) => {
+        const fill = document.querySelector(`.chapter-segment[data-i="${i}"] .chapter-segment-fill`);
+        if (fill) fill.style.width = t >= c.start + c.duration ? '100%' : t > c.start ? `${(t - c.start) / c.duration * 100}%` : '0';
+    });
+    els.progressDot.style.left = `calc(${t / d * 100}% - 6px)`;
+
+    const sub = subtitlesOn && subtitles.find(s => t >= s.start && t < s.end);
+    els.subtitleText.textContent = sub ? sub.text : '';
+}
+
+function insertText(str, newlineBefore = false) {
+    const ta = $('feedbackTextarea'), start = ta.selectionStart, text = ta.value;
+    const nl = newlineBefore && text.length && start === text.length && !text.endsWith('\n') ? '\n' : '';
+    ta.value = text.slice(0, start) + nl + str + text.slice(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = start + nl.length + str.length;
+    ta.focus();
+}
+
+function insertTimestamp() {
+    const ch = getChapter(video.currentTime);
+    insertText(`[${fmt(video.currentTime)}] ${ch?.name || 'Unknown'}: `, true);
+}
+
+function copyNotes() {
+    const text = $('feedbackTextarea').value.trim();
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    $('copyAllBtn').textContent = 'Copied!';
+    setTimeout(() => $('copyAllBtn').textContent = 'Copy', 1500);
+}
+
+function togglePlay() {
+    if (ended) { video.currentTime = 0; ended = false; }
+    video.paused ? video.play() : video.pause();
+}
+
+function seek(e) {
+    video.currentTime = clamp((e.clientX - progressBar.getBoundingClientRect().left) / progressBar.offsetWidth, 0, 1) * video.duration;
+    ended = false;
+    updateUI();
+}
+
+async function downloadVideo(quality) {
+    $('downloadConfirm').disabled = true;
+    $('downloadProgress').classList.add('show');
+    $('progressFill').style.width = '0%';
+    $('progressStatus').textContent = quality === 'high' ? 'Re-rendering...' : 'Preparing...';
+
+    const checkInterval = quality === 'high' && setInterval(async () => {
+        const res = await fetch('/download/status').catch(() => null);
+        if (res?.ok) { const s = await res.json(); $('progressFill').style.width = s.progress + '%'; $('progressStatus').textContent = s.message; }
+    }, 1000);
+
+    try {
+        const res = await fetch('/download?quality=' + quality);
+        if (checkInterval) clearInterval(checkInterval);
+        if (!res.ok) throw new Error('Download failed');
+        $('progressFill').style.width = '100%';
+        $('progressStatus').textContent = 'Ready!';
+        const blob = await res.blob(), a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = res.headers.get('X-Filename') || 'video.mp4';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        setTimeout(() => downloadModal.classList.remove('open'), 500);
+    } catch (e) {
+        if (checkInterval) clearInterval(checkInterval);
+        $('progressStatus').textContent = 'Error: ' + e.message;
+        $('downloadConfirm').disabled = false;
+    }
+}
+
+async function init() {
+    chapters = await (await fetch('/chapters.json')).json();
+    try { const res = await fetch('/subtitles.srt'); if (res.ok) subtitles = parseSRT(await res.text()); } catch {}
+
+    // Load tab content
+    loadText('/plan.md', $('planContent'), parseMarkdown);
+    loadText('/cscript.py', $('codeContent'), code => '<pre>' + highlightPython(code) + '</pre>');
+
+    // Tab switching
+    document.querySelectorAll('.content-tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+    $('chapterDropdown').innerHTML = chapters.map(c => `<div class="chapter-item" data-t="${c.start}"><span class="ch-name">${c.name}</span><span class="ch-time">${fmt(c.start)}</span></div>`).join('');
+    $('progressTrack').innerHTML = chapters.map((c, i) => `<div class="chapter-segment" data-i="${i}" style="flex-grow:${c.duration}"><div class="chapter-segment-fill"></div></div>`).join('');
+    $('speedMenu').innerHTML = [0.5, 0.75, 1, 1.25, 1.5, 2].map(s => `<div class="menu-opt${s === 1 ? ' active' : ''}" data-speed="${s}"><span class="check">✓</span>${s === 1 ? 'Normal' : s + 'x'}</div>`).join('');
+    if (subtitles.length) $('ccBtn').hidden = false;
+
+    // Video events
+    video.addEventListener('timeupdate', updateUI);
+    video.addEventListener('play', () => { ended = false; updateUI(); });
+    video.addEventListener('pause', updateUI);
+    video.addEventListener('ended', () => { ended = true; updateUI(); });
+    video.addEventListener('loadedmetadata', () => els.durTime.textContent = fmt(video.duration));
+    video.addEventListener('click', togglePlay);
+    $('playBtn').addEventListener('click', togglePlay);
+
+    // Progress bar drag
+    makeDraggable(progressBar, seek);
+
+    // Document-level click handlers (close dropdowns)
+    const closeMenus = () => settingsMenu.querySelectorAll('.open').forEach(el => el.classList.remove('open')) || settingsMenu.classList.remove('open');
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.chapter-dropdown-container')) $('chapterDropdown').classList.remove('open');
+        closeMenus();
+    });
+
+    // Chapter dropdown
+    $('sceneName').addEventListener('click', e => { e.stopPropagation(); $('chapterDropdown').classList.toggle('open'); });
+    $('chapterDropdown').addEventListener('click', e => {
+        const ch = e.target.closest('.chapter-item');
+        if (ch) { video.currentTime = +ch.dataset.t; ended = false; updateUI(); $('chapterDropdown').classList.remove('open'); }
+    });
+
+    // Feedback
+    $('insertTimestampBtn').addEventListener('click', insertTimestamp);
+    $('copyAllBtn').addEventListener('click', copyNotes);
+
+    // Custom buttons
+    const STORAGE_KEY = 'customFeedbackButtons';
+    let buttons = JSON.parse(localStorage.getItem(STORAGE_KEY)) || ['fix layout', 'slow down'];
+
+    const render = () => {
+        $('customButtons').innerHTML = buttons.map((label, i) =>
+            `<div class="custom-btn-wrap"><button class="action-btn" data-label="${label}">${label}</button><button class="remove-btn" data-i="${i}">&times;</button></div>`
+        ).join('');
+    };
+    const save = () => { localStorage.setItem(STORAGE_KEY, JSON.stringify(buttons)); render(); };
+
+    $('addCustomBtn').addEventListener('click', () => {
+        const label = prompt('Enter button label:')?.trim();
+        if (label) { buttons.push(label); save(); }
+    });
+
+    $('customButtons').addEventListener('click', e => {
+        const btn = e.target.closest('[data-label]');
+        if (btn) insertText(btn.dataset.label);
+        const rm = e.target.closest('.remove-btn');
+        if (rm) { buttons.splice(+rm.dataset.i, 1); save(); }
+    });
+
+    render();
+
+    // CC toggle
+    $('ccBtn').addEventListener('click', () => { subtitlesOn = !subtitlesOn; $('ccBtn').classList.toggle('active', subtitlesOn); updateUI(); });
+
+    // Settings menu
+    $('settingsBtn').addEventListener('click', e => { e.stopPropagation(); settingsMenu.classList.toggle('open'); });
+    settingsMenu.addEventListener('mouseover', e => { const opt = e.target.closest('[data-submenu]'); if (opt) { settingsMenu.querySelectorAll('.submenu').forEach(s => s.classList.remove('open')); $(opt.dataset.submenu).classList.add('open'); } });
+
+    // Menu selections using helper
+    selectOption($('fontSizeMenu'), '[data-size]', 'active', opt => { els.subtitleText.className = 'subtitle-text size-' + opt.dataset.size; closeMenus(); });
+    selectOption($('speedMenu'), '[data-speed]', 'active', opt => { video.playbackRate = +opt.dataset.speed; closeMenus(); });
+    selectOption(downloadModal, '.modal-opt', 'selected', opt => selectedQuality = opt.dataset.quality);
+
+    // Download modal
+    let selectedQuality = 'low';
+    $('downloadBtn').addEventListener('click', () => { downloadModal.classList.add('open'); $('downloadProgress').classList.remove('show'); $('downloadConfirm').disabled = false; });
+    $('downloadCancel').addEventListener('click', () => downloadModal.classList.remove('open'));
+    downloadModal.addEventListener('click', e => e.target === downloadModal && downloadModal.classList.remove('open'));
+    $('downloadConfirm').addEventListener('click', () => downloadVideo(selectedQuality));
+
+    // Keyboard shortcuts
+    const seekLeft = () => seekBy(-5), seekRight = () => seekBy(5);
+    document.addEventListener('keydown', e => {
+        if (e.target.tagName === 'TEXTAREA' || downloadModal.classList.contains('open')) return;
+        const actions = { Space: togglePlay, KeyK: togglePlay, ArrowLeft: seekLeft, KeyJ: seekLeft, ArrowRight: seekRight, KeyL: seekRight, KeyC: () => subtitles.length && $('ccBtn').click(), KeyT: insertTimestamp };
+        if (actions[e.code]) { e.preventDefault(); actions[e.code](); }
+    });
+
+    // Panel resizer
+    const resizer = $('resizer'), feedbackPanel = document.querySelector('.feedback-panel');
+    makeDraggable(resizer, e => {
+        const containerRect = document.querySelector('.container').getBoundingClientRect();
+        feedbackPanel.style.width = clamp(e.clientX - containerRect.left - 24, 200, 600) + 'px';
+    }, () => document.body.classList.remove('resizing'), 'active');
+    resizer.addEventListener('mousedown', () => document.body.classList.add('resizing'));
+
+    updateUI();
+}
+init();
+</script>
+</body>
+</html>

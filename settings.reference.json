@@ -1,0 +1,348 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-8"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-telegram.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/mirror-session-to-nas.sh stop",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/blocked-detector.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-telegram.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-telegram.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-cheatsheet.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/mirror-session-to-nas.sh start",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-telegram.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-telegram.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-end-wrapper.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/mirror-session-to-nas.sh end",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/evaluate-session-wrapper.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-general-agents.sh",
+            "timeout": 5,
+            "statusMessage": "Enforcing specialized-agent-only rule..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/log-ssh.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/log-docker.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/guard-destructive.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/supervisor-git-tag-wave-gate.sh",
+            "timeout": 15,
+            "statusMessage": "Checking wave readiness before tag..."
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/plugins/cache/everything-claude-code/everything-claude-code/1.4.1/skills/continuous-learning-v2/hooks/observe.sh pre",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/build-vs-buy.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/log-file-writes.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/log-file-writes.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/plugins/cache/everything-claude-code/everything-claude-code/1.4.1/skills/continuous-learning-v2/hooks/observe.sh post",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/supervisor-sha-crossref.sh",
+            "timeout": 15,
+            "statusMessage": "Cross-referencing agent SHA against live node..."
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/time-sensitive-guard.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/specialist-suggester.sh"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/context-refresh-tick.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/rabbit-hole-guard.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline.sh",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "everything-claude-code@everything-claude-code": true,
+    "ralph-loop@claude-plugins-official": true,
+    "claude-reflect@claude-reflect-marketplace": true,
+    "documentation-standards@claude-code-workflows": true,
+    "code-documentation@claude-code-workflows": true,
+    "debugging-toolkit@claude-code-workflows": true,
+    "git-pr-workflows@claude-code-workflows": true,
+    "backend-development@claude-code-workflows": true,
+    "frontend-mobile-development@claude-code-workflows": true,
+    "full-stack-orchestration@claude-code-workflows": true,
+    "unit-testing@claude-code-workflows": true,
+    "tdd-workflows@claude-code-workflows": true,
+    "code-refactoring@claude-code-workflows": true,
+    "dependency-management@claude-code-workflows": true,
+    "error-debugging@claude-code-workflows": true,
+    "team-collaboration@claude-code-workflows": true,
+    "llm-application-dev@claude-code-workflows": true,
+    "agent-orchestration@claude-code-workflows": true,
+    "context-management@claude-code-workflows": true,
+    "machine-learning-ops@claude-code-workflows": true,
+    "data-engineering@claude-code-workflows": false,
+    "incident-response@claude-code-workflows": true,
+    "error-diagnostics@claude-code-workflows": true,
+    "observability-monitoring@claude-code-workflows": true,
+    "cloud-infrastructure@claude-code-workflows": false,
+    "application-performance@claude-code-workflows": true,
+    "database-cloud-optimization@claude-code-workflows": true,
+    "comprehensive-review@claude-code-workflows": true,
+    "performance-testing-review@claude-code-workflows": true,
+    "codebase-cleanup@claude-code-workflows": true,
+    "database-design@claude-code-workflows": true,
+    "database-migrations@claude-code-workflows": false,
+    "security-scanning@claude-code-workflows": true,
+    "security-compliance@claude-code-workflows": true,
+    "backend-api-security@claude-code-workflows": true,
+    "api-scaffolding@claude-code-workflows": true,
+    "api-testing-observability@claude-code-workflows": true,
+    "seo-content-creation@claude-code-workflows": false,
+    "seo-technical-optimization@claude-code-workflows": false,
+    "seo-analysis-monitoring@claude-code-workflows": false,
+    "documentation-generation@claude-code-workflows": true,
+    "business-analytics@claude-code-workflows": true,
+    "startup-business-analyst@claude-code-workflows": true,
+    "customer-sales-automation@claude-code-workflows": false,
+    "content-marketing@claude-code-workflows": false,
+    "payment-processing@claude-code-workflows": true,
+    "python-development@claude-code-workflows": true,
+    "javascript-typescript@claude-code-workflows": true,
+    "systems-programming@claude-code-workflows": true,
+    "shell-scripting@claude-code-workflows": true,
+    "developer-essentials@claude-code-workflows": true,
+    "reverse-engineering@claude-code-workflows": true,
+    "conductor@claude-code-workflows": false,
+    "ui-design@claude-code-workflows": true,
+    "agent-teams@claude-code-workflows": true,
+    "plugin-eval@claude-code-workflows": true,
+    "pensyve@claude-code-workflows": false,
+    "block-no-verify@claude-code-workflows": true,
+    "autoresearch@autoresearch": true,
+    "claude-seo-skills@lionkiii-seo": false,
+    "claude-mem@thedotmack": false,
+    "frontend-design@claude-plugins-official": true
+  },
+  "effortLevel": "medium",
+  "tui": "default",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
+  "voiceEnabled": true,
+  "_comment_supervisor_hooks": "SUPERVISOR DISCIPLINE HOOKS (added 2026-04-26) — 4 structural gates that enforce agent discipline without relying on prompt memory. Hook 1 (PreToolUse/Agent): blocks Agent dispatch without INTEGRATION_ACCEPTANCE clause. Hook 2 (PreToolUse/TaskUpdate): blocks marking tasks complete without recent evidence in night_shift_log.jsonl. Hook 3 (PreToolUse/Bash git tag): requires wave-readiness-gate to PROCEED before tagging. Hook 4 (PostToolUse/Agent): auto-extracts claimed SHA from agent report and cross-references against live node git log, appending JSONL event to night_shift_log.jsonl.",
+  "mcpServers": {
+    "comfyui": {
+      "command": "/usr/bin/node",
+      "args": [
+        "~/.npm-global/lib/node_modules/comfyui-mcp/dist/index.js"
+      ],
+      "env": {
+        "COMFYUI_URL": "http://<lan-ip>:8188"
+      }
+    }
+  },
+  "fastMode": true
+}
