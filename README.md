@@ -79,10 +79,10 @@ claude mcp add context7 -- npx -y @upstash/context7-mcp
 
 | Folder | Count | What it is |
 |---|---|---|
-| `skills/` | 158 | Slash-invocable workflows (research, code review, frontend design, debugging, reports…) |
-| `agents/` | 39 | Specialist subagents (backend, Python, security, RAG, Docker, GitHub ops…) |
-| `commands/` | 42 | Custom slash commands |
-| `hooks/` | 24+ | Automation scripts (session start, guards, audits) — reference; adapt paths |
+| `skills/` | 114 | Slash-invocable workflows (research, code review, frontend design, debugging, reports…) |
+| `agents/` | 30 | Specialist subagents (backend, Python, security, RAG, Docker, GitHub ops…) |
+| `commands/` | 56 | Custom slash commands |
+| `hooks/` | 27 | Automation scripts (session start, guards, audits) — reference; adapt paths |
 | `settings.reference.json` | — | Example of full hook wiring (paths are machine-specific — adapt) |
 | `CLAUDE.starter.md` | — | A clean starter for your own global instructions |
 | `CHEATSHEET.md` | — | New-user command cheat sheet |
