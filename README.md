@@ -38,7 +38,7 @@ First run walks you through login (Claude Pro/Max subscription or API key both w
 Copy the pieces you want into your `~/.claude/` directory:
 
 ```bash
-git clone https://github.com/<you>/Claude-Code-Helper.git
+git clone https://github.com/viriansemail-sys/Claude-Code-Helper.git
 cd Claude-Code-Helper
 mkdir -p ~/.claude
 cp -r skills agents commands hooks ~/.claude/
