@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>/myvoice</title>
+<meta name="description" content="/myvoice is a Claude Code skill that writes in one human's voice. It was built from 2,004 real messages, three independent AI analysts, and a consensus rule. This page explains how it was made, what is in it, and why.">
+<link rel="icon" href="hive-ai-bee-badge.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#1c1208; --panel:#26190b; --panel2:#2f200f; --line:#4a3519; --line-soft:#3a2618;
+  --ink:#e9ecf5; --cream:#f7ecd4; --mute:#c4a878; --gold:#f5c66b; --accent:#ffd166; --deep:#c98a2a;
+  --ok:#7be38e; --hot:#ff5d5d; --grad:linear-gradient(90deg,#ffd166 0%,#c98a2a 100%);
+  --display:"Chakra Petch","Rajdhani","Segoe UI",system-ui,sans-serif;
+  --body:"Instrument Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding:0 16px 72px;position:relative;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;pointer-events:none;z-index:0}
+body::before{inset:0 0 auto 0;height:260px;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 280' preserveAspectRatio='xMidYMin slice'%3E%3Cg stroke='%23f5c66b' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0,50 L140,50 L160,70 L340,70 L360,50 L580,50 L600,30 L820,30 L840,50 L1060,50 L1080,70 L1440,70'/%3E%3Cpath d='M0,120 L100,120 L120,100 L280,100 L300,120 L500,120 L520,140 L760,140 L780,120 L1020,120 L1040,140 L1440,140'/%3E%3Cpath d='M0,190 L180,190 L200,170 L420,170 L440,190 L680,190 L700,210 L940,210 L960,190 L1280,190 L1300,170 L1440,170'/%3E%3Cpath d='M180,0 L180,40 L200,60 L200,110'/%3E%3Cpath d='M480,0 L480,30 L500,50 L500,100'/%3E%3Cpath d='M780,0 L780,20 L800,40 L800,135'/%3E%3Cpath d='M1080,0 L1080,40 L1100,60 L1100,120'/%3E%3Cpath d='M1280,0 L1280,30 L1300,50 L1300,165'/%3E%3C/g%3E%3Cg fill='%23f5c66b'%3E%3Ccircle cx='160' cy='70' r='3.6'/%3E%3Ccircle cx='360' cy='50' r='3.6'/%3E%3Ccircle cx='600' cy='30' r='3.6'/%3E%3Ccircle cx='840' cy='50' r='3.6'/%3E%3Ccircle cx='1080' cy='70' r='3.6'/%3E%3Ccircle cx='120' cy='100' r='3.6'/%3E%3Ccircle cx='300' cy='120' r='3.6'/%3E%3Ccircle cx='520' cy='140' r='3.6'/%3E%3Ccircle cx='780' cy='120' r='3.6'/%3E%3Ccircle cx='1040' cy='140' r='3.6'/%3E%3Ccircle cx='200' cy='170' r='3.6'/%3E%3Ccircle cx='440' cy='190' r='3.6'/%3E%3Ccircle cx='700' cy='210' r='3.6'/%3E%3Ccircle cx='960' cy='190' r='3.6'/%3E%3Ccircle cx='1300' cy='170' r='3.6'/%3E%3Ccircle cx='200' cy='60' r='3.6'/%3E%3Ccircle cx='500' cy='50' r='3.6'/%3E%3Ccircle cx='800' cy='40' r='3.6'/%3E%3Ccircle cx='1100' cy='60' r='3.6'/%3E%3Ccircle cx='1300' cy='50' r='3.6'/%3E%3C/g%3E%3C/svg%3E") top center / max(1440px,100%) auto no-repeat;opacity:.2;-webkit-mask-image:linear-gradient(180deg,#000 62%,transparent);mask-image:linear-gradient(180deg,#000 62%,transparent)}
+body::after{inset:auto 0 0 0;height:300px;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 360'%3E%3Cg fill='none' stroke='%23f5c66b' stroke-width='1.4'%3E%3Cpolygon points='40,0 80,23 80,69 40,92 0,69 0,23'/%3E%3Cpolygon points='120,0 160,23 160,69 120,92 80,69 80,23'/%3E%3Cpolygon points='200,0 240,23 240,69 200,92 160,69 160,23'/%3E%3Cpolygon points='280,0 320,23 320,69 280,92 240,69 240,23'/%3E%3Cpolygon points='0,69 40,92 40,138 0,161 -40,138 -40,92'/%3E%3Cpolygon points='80,69 120,92 120,138 80,161 40,138 40,92'/%3E%3Cpolygon points='160,69 200,92 200,138 160,161 120,138 120,92'/%3E%3Cpolygon points='240,69 280,92 280,138 240,161 200,138 200,92'/%3E%3Cpolygon points='320,69 360,92 360,138 320,161 280,138 280,92'/%3E%3Cpolygon points='40,138 80,161 80,207 40,230 0,207 0,161'/%3E%3Cpolygon points='120,138 160,161 160,207 120,230 80,207 80,161'/%3E%3Cpolygon points='200,138 240,161 240,207 200,230 160,207 160,161'/%3E%3Cpolygon points='280,138 320,161 320,207 280,230 240,207 240,161'/%3E%3Cpolygon points='40,207 80,230 80,276 40,299 0,276 0,230'/%3E%3Cpolygon points='160,207 200,230 200,276 160,299 120,276 120,230'/%3E%3Cpolygon points='240,207 280,230 280,276 240,299 200,276 200,230'/%3E%3C/g%3E%3C/svg%3E") bottom left / 340px 340px repeat-x;opacity:.1}
+.wrap{max-width:1120px;margin:0 auto;position:relative;z-index:1;display:flex;flex-direction:column;gap:72px}
+
+/* ---------- header / hero ---------- */
+header{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding-top:40px}
+.badge{width:112px;height:112px;border-radius:50%;box-shadow:0 0 0 1px rgba(245,198,107,.30),0 3px 18px rgba(0,0,0,.45);flex:none;animation:hover 6s ease-in-out infinite}
+@keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(40px,7vw,76px);line-height:.98;margin:6px 0 10px;letter-spacing:-.01em;text-wrap:balance}
+h1 .slash{color:var(--accent)}
+h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mute);max-width:64ch;margin:0;font-size:18px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:stretch}
+.lead{display:flex;flex-direction:column;gap:18px;justify-content:center}
+.lead p{margin:0;font-size:18px;color:var(--cream);max-width:58ch}
+.lead p b{color:var(--accent);font-weight:600}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:13px;padding:10px 16px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none;transition:border-color .2s,transform .2s,background .2s}
+.btn:hover{border-color:var(--gold);transform:translateY(-1px)}
+.btn.primary{background:var(--accent);color:#1c1208;border-color:var(--accent);font-weight:600}
+.btn.primary:hover{background:var(--gold)}
+
+/* terminal */
+.term{background:#120b04;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45),0 0 0 1px rgba(245,198,107,.08);display:flex;flex-direction:column;min-height:330px}
+.term .bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line-soft);background:#1a1007}
+.term .bar i{width:11px;height:11px;border-radius:50%;background:#4a3519}
+.term .bar i:nth-child(1){background:#ff5d5d}.term .bar i:nth-child(2){background:#ffb347}.term .bar i:nth-child(3){background:#7be38e}
+.term .bar span{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.12em}
+.term pre{margin:0;padding:18px 18px 22px;font-family:var(--mono);font-size:13.5px;line-height:1.6;color:var(--cream);white-space:pre-wrap;word-break:break-word;flex:1}
+.term .p{color:var(--accent)}
+.term .c{color:var(--mute)}
+.term .ok{color:var(--ok)}
+.term .bad{color:var(--hot);text-decoration:line-through;text-decoration-thickness:2px}
+.cursor{display:inline-block;width:8px;height:16px;background:var(--accent);vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- generic ---------- */
+section{display:flex;flex-direction:column;gap:18px}
+h2{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.4vw,34px);margin:0;text-wrap:balance}
+h2 .n{font-family:var(--mono);font-size:13px;color:var(--mute);letter-spacing:.2em;display:block;margin-bottom:6px;font-weight:400}
+.lede{color:var(--mute);margin:0;max-width:68ch;font-size:17px}
+.mono{font-family:var(--mono)}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px;position:relative;overflow:hidden;min-width:0}
+.card h3{font-family:var(--display);font-size:20px;margin:0 0 6px;font-weight:600}
+.card p{margin:0;color:var(--mute);font-size:14.5px}
+.card.hex::after{content:"";position:absolute;right:-30px;bottom:-40px;width:200px;height:200px;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 360'%3E%3Cg fill='none' stroke='%23f5c66b' stroke-width='1.4'%3E%3Cpolygon points='40,0 80,23 80,69 40,92 0,69 0,23'/%3E%3Cpolygon points='120,0 160,23 160,69 120,92 80,69 80,23'/%3E%3Cpolygon points='200,0 240,23 240,69 200,92 160,69 160,23'/%3E%3Cpolygon points='280,0 320,23 320,69 280,92 240,69 240,23'/%3E%3Cpolygon points='80,69 120,92 120,138 80,161 40,138 40,92'/%3E%3Cpolygon points='160,69 200,92 200,138 160,161 120,138 120,92'/%3E%3Cpolygon points='240,69 280,92 280,138 240,161 200,138 200,92'/%3E%3Cpolygon points='120,138 160,161 160,207 120,230 80,207 80,161'/%3E%3Cpolygon points='200,138 240,161 240,207 200,230 160,207 160,161'/%3E%3C/g%3E%3C/svg%3E") no-repeat;opacity:.1;pointer-events:none}
+
+/* ---------- numbers ---------- */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.tile{border-top:2px solid var(--gold);padding-top:12px;min-width:0}
+.tile .v{font-family:var(--display);font-weight:700;font-size:clamp(34px,4.6vw,50px);line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.tile .v small{font-size:.42em;color:var(--mute);font-weight:500;margin-left:4px}
+.tile .k{color:var(--mute);font-size:13.5px;margin-top:6px}
+
+/* ---------- pipeline ---------- */
+.pipe{display:grid;grid-template-columns:1fr 70px 1fr 70px 1fr 70px 1fr;align-items:center}
+.node{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.node.head{border-color:var(--gold);box-shadow:0 0 0 1px rgba(245,198,107,.25),0 10px 40px rgba(255,209,102,.08)}
+.node .role{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.node h3{font-family:var(--display);font-size:22px;margin:0;line-height:1.05}
+.node p{margin:0;font-size:13px;color:var(--mute)}
+.link{display:flex;align-items:center;justify-content:center;padding:0 6px}
+.wire{width:100%;height:8px;border-radius:4px;position:relative;overflow:hidden;background:rgba(255,209,102,.22)}
+.wire i{position:absolute;top:0;bottom:0;width:22px;border-radius:4px;background:var(--accent);box-shadow:0 0 12px var(--accent);animation:flow 1.6s linear infinite}
+.wire i:nth-child(2){animation-delay:-.55s}.wire i:nth-child(3){animation-delay:-1.1s}
+@keyframes flow{from{left:-26px}to{left:100%}}
+.analysts{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.chip.gold{border-color:var(--gold);color:var(--gold)}
+
+/* ---------- rules ---------- */
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;counter-reset:rule}
+.rule{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;position:relative;min-width:0;transition:transform .25s,border-color .25s}
+.rule:hover{transform:translateY(-3px);border-color:var(--gold)}
+.rule::before{counter-increment:rule;content:counter(rule,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.18em}
+.rule h3{font-family:var(--display);font-size:17px;margin:6px 0 6px;font-weight:600;line-height:1.2}
+.rule p{margin:0;font-size:13.5px;color:var(--mute)}
+.rule .cnt{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--accent);background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.25);border-radius:6px;padding:2px 8px}
+
+/* ---------- ban list ---------- */
+.ban{display:flex;flex-wrap:wrap;gap:8px}
+.ban span{font-family:var(--mono);font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--cream);position:relative;transition:color .2s,border-color .2s;cursor:default}
+.ban span::after{content:"";position:absolute;left:10px;right:10px;top:50%;height:2px;background:var(--hot);transform:scaleX(0);transform-origin:left;transition:transform .35s ease}
+.ban span:hover{color:var(--mute);border-color:var(--hot)}
+.ban span:hover::after{transform:scaleX(1)}
+.ban.auto span.x::after{transform:scaleX(1)}
+.ban.auto span.x{color:var(--mute);border-color:var(--hot)}
+
+/* ---------- litmus ---------- */
+.litmus{display:grid;gap:10px}
+.check{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.check .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);position:relative;margin-top:2px;transition:border-color .3s,background .3s}
+.check .box::after{content:"";position:absolute;left:7px;top:2px;width:6px;height:12px;border:solid #1c1208;border-width:0 3px 3px 0;transform:rotate(45deg) scale(0);transition:transform .3s .1s}
+.check.on .box{background:var(--ok);border-color:var(--ok)}
+.check.on .box::after{transform:rotate(45deg) scale(1)}
+.check b{display:block;font-family:var(--display);font-size:16px;font-weight:600}
+.check span{color:var(--mute);font-size:13.5px}
+
+/* ---------- prompt / code ---------- */
+.code{background:#120b04;border:1px solid var(--line);border-radius:14px;padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--cream);white-space:pre-wrap;word-break:break-word;margin:0;overflow:auto}
+.code .k{color:var(--accent)}.code .c{color:var(--mute)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+/* ---------- before/after ---------- */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ba .card{display:flex;flex-direction:column;gap:10px}
+.ba .tag{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+.ba .tag.bad{color:var(--hot)}.ba .tag.good{color:var(--ok)}
+.ba blockquote{margin:0;font-size:15px;color:var(--cream);line-height:1.6}
+.ba .why{font-size:12.5px;color:var(--mute);border-top:1px dashed var(--line);padding-top:8px}
+.ba .why em{color:var(--hot);font-style:normal}
+
+/* ---------- destinations ---------- */
+.dest{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.meter{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden;margin:10px 0 6px}
+.meter span{display:block;height:100%;background:var(--grad);width:0;transition:width 1.2s ease}
+.in .meter span{width:var(--w)}
+.meter-k{font-family:var(--mono);font-size:11px;color:var(--mute)}
+
+footer{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:26px;color:var(--mute);font-size:13.5px}
+footer img{width:56px;height:56px;border-radius:50%;box-shadow:0 0 0 1px rgba(245,198,107,.3)}
+footer .mono{font-size:12px}
+
+@media (max-width:900px){
+  .hero,.two,.ba{grid-template-columns:1fr}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rules,.three,.dest{grid-template-columns:1fr 1fr}
+  .pipe{grid-template-columns:1fr;gap:10px}
+  .link{height:46px}
+  .wire{width:8px;height:100%}
+  .wire i{width:100%;height:22px;animation-name:flowv}
+  @keyframes flowv{from{top:-26px}to{top:100%}}
+}
+@media (max-width:600px){
+  .rules,.three,.dest{grid-template-columns:1fr}
+  h1{font-size:44px}
+  .badge{width:88px;height:88px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img class="badge" src="hive-ai-bee-badge.png" alt="Hive AI bee badge">
+  <div>
+    <div class="eyebrow">Hive AI · Claude Code skill</div>
+    <h1><span class="slash">/</span>myvoice<br><span class="grad">write it like me, not like an AI</span></h1>
+    <p class="sub">A ghostwriting skill built from one person's real messages, three independent AI analysts, and one rule: nothing goes in the standard unless all three agreed and the corpus proved it.</p>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="lead reveal">
+    <p>Every model has a default voice. It is smooth, balanced, and it sounds like nobody. Post it under your own name and people can tell in one sentence.</p>
+    <p><b>/myvoice</b> fixes that at the source. It measures how one human actually writes, turns the measurements into rules with real counts, and makes the assistant pass a litmus test before anything ships.</p>
+    <div class="cta">
+      <a class="btn primary" href="#how">How it was built</a>
+      <a class="btn" href="#rules">The rules</a>
+      <a class="btn" href="#try">Before and after</a>
+    </div>
+  </div>
+  <div class="term reveal" aria-label="terminal demo">
+    <div class="bar"><i></i><i></i><i></i><span>claude code</span></div>
+    <pre id="term"></pre>
+  </div>
+</div>
+
+<section id="why" class="reveal">
+  <h2><span class="n">01</span>Why it exists</h2>
+  <p class="lede">The order came in at two in the morning, after one too many posts that read like a press release.</p>
+  <div class="two">
+    <div class="card hex">
+      <h3>The ask, verbatim</h3>
+      <p>"Use OUR CLI agents to help come up with a full analysis of my writing style and speech patterns. Minus my typos. Then use that CLI and your analysis to form the basis of the rewrite and all future socials posts."</p>
+      <p style="margin-top:10px">"Make sure they do a proper deep-research audit. Not just skimming."</p>
+      <p style="margin-top:10px">"Consensus must be reached among all."</p>
+    </div>
+    <div class="card">
+      <h3>What that rules out</h3>
+      <p>No vibes. No "sound casual" prompt. No single model's opinion of what the person sounds like. The standard had to be measured, cross-checked by independent analysts, and every rule had to carry a number from the full corpus. Typos are noise, not style. Voice, never spelling.</p>
+    </div>
+  </div>
+</section>
+
+<section id="numbers" class="reveal">
+  <h2><span class="n">02</span>The numbers behind it</h2>
+  <div class="tiles">
+    <div class="tile"><div class="v"><span data-count="2004">0</span></div><div class="k">verbatim messages in the corpus, one month of real chat</div></div>
+    <div class="tile"><div class="v"><span data-count="3">0</span></div><div class="k">independent AI analysts, run blind to each other</div></div>
+    <div class="tile"><div class="v"><span data-count="12">0</span></div><div class="k">Tier 1 rules that survived consensus and frequency checks</div></div>
+    <div class="tile"><div class="v"><span data-count="0.15" data-dec="2">0</span><small>%</small></div><div class="k">of messages contain an emoji. Three out of 2,004.</div></div>
+  </div>
+</section>
+
+<section id="how" class="reveal">
+  <h2><span class="n">03</span>How it was built</h2>
+  <p class="lede">A pipeline, not a prompt. Each stage has an artifact you can open.</p>
+  <div class="pipe">
+    <div class="node">
+      <div class="role">Stage 1</div><h3>Corpus</h3>
+      <p>2,004 messages pulled from session archives, verbatim, typos kept so nothing is edited by hand. Separated by a delimiter so a model can read them as a list.</p>
+    </div>
+    <div class="link"><div class="wire"><i></i><i></i><i></i></div></div>
+    <div class="node">
+      <div class="role">Stage 2</div><h3>Three analysts</h3>
+      <p>The same forensic prompt sent to three different CLI agents through one wrapper. Each wrote its own style profile without seeing the others.</p>
+      <div class="analysts"><span class="chip">grok</span><span class="chip">codex</span><span class="chip">antigravity</span><span class="chip gold">+ statistical profile</span></div>
+    </div>
+    <div class="link"><div class="wire"><i></i><i></i><i></i></div></div>
+    <div class="node head">
+      <div class="role">Stage 3</div><h3>Consensus + count</h3>
+      <p>A claim becomes a rule only if all three analysts made it <b>and</b> a grep over the full corpus backs it with a real frequency. Claims that failed the count were rejected and recorded as rejected.</p>
+    </div>
+    <div class="link"><div class="wire"><i></i><i></i><i></i></div></div>
+    <div class="node">
+      <div class="role">Stage 4</div><h3>Standard + skill</h3>
+      <p>The rules live in one README with the counts beside them. The skill is the applicator: it reads the standard on every run, drafts, then runs the litmus test.</p>
+    </div>
+  </div>
+</section>
+
+<section id="prompt" class="reveal">
+  <h2><span class="n">04</span>The prompt the analysts got</h2>
+  <p class="lede">Same text to every analyst. Seven numbered sections so the outputs line up for comparison. Quotes required as evidence. No flattery allowed.</p>
+  <pre class="code"><span class="c">TASK:</span> Writing-style forensic analysis of one person, from his real chat messages below.
+
+You are analyzing the verbatim messages of one human (separator: ---). They were typed fast on phones and keyboards, so <span class="k">IGNORE typos and misspellings entirely</span>. They are noise, not style. Analyze the underlying VOICE.
+
+Deliver a structured STYLE PROFILE with these exact sections:
+<span class="k">1. SENTENCE RHYTHM</span>      typical length, cadence, how he chains thoughts
+<span class="k">2. OPENERS &amp; CONNECTORS</span> how he starts messages, favorite transitions
+<span class="k">3. VOCABULARY &amp; REGISTER</span> plain vs technical, characteristic phrases (quote real examples), what he NEVER says
+<span class="k">4. TONE MARKERS</span>          how enthusiasm, frustration, skepticism and humor actually show up (quote)
+<span class="k">5. THINKING PATTERN</span>      how he frames problems, decisions, asks
+<span class="k">6. GHOSTWRITING RULES</span>    10 to 15 concrete do/don't rules for posts that sound like HIM, with AI-isms to ban
+<span class="k">7. LITMUS TEST</span>           5 quick checks to run on any draft
+
+Be concrete. Quote his actual phrases as evidence. <span class="k">No flattery, no padding.</span> Output markdown only.
+
+<span class="c">=== CORPUS (verbatim, --- separated) ===</span>
+...</pre>
+</section>
+
+<section id="rules" class="reveal">
+  <h2><span class="n">05</span>What is in it: the twelve Tier 1 rules</h2>
+  <p class="lede">Each one is law because all three analysts said it and the corpus count agreed. The counts are real.</p>
+  <div class="rules">
+    <div class="rule"><h3>Short, load-bearing sentences. One job each.</h3><p>Fragments are legal and characteristic. "Same model. Same set up."</p><span class="cnt">avg 21.4 words / message</span></div>
+    <div class="rule"><h3>Start mid-conversation, never with a thesis.</h3><p>Openers are "Okay", "I", a question, "Hey", "No/Yes", "Also", "So".</p><span class="cnt">"Okay" 188× · "Hey" 79×</span></div>
+    <div class="rule"><h3>"Also" is the semicolon.</h3><p>New requirements bolt on with Also / And / But. Nothing nests in a subclause.</p><span class="cnt">"Also" 199×</span></div>
+    <div class="rule"><h3>Write the next physical action, not the concept.</h3><p>"Make sure", "lets get", "lets". Verbs that move something.</p><span class="cnt">"make sure" 110× · "lets" 89×</span></div>
+    <div class="rule"><h3>Questions drive.</h3><p>Often a command wearing a question mark. "Wanna try a 1 minute sustained test?"</p><span class="cnt">29% of messages ask one</span></div>
+    <div class="rule"><h3>Zero emoji. No hashtag walls.</h3><p>Three emoji in two thousand messages. Emoji bullets and podiums are pure AI cologne.</p><span class="cnt">0.15% base rate</span></div>
+    <div class="rule"><h3>The AI-word ban.</h3><p>Furthermore, delve, tapestry, testament, foster, moreover, leverage, robust, seamless, holistic, paradigm, game-changer. Also em-dash chains, "Here's the thing", tricolon flourishes.</p><span class="cnt">~0 occurrences in corpus</span></div>
+    <div class="rule"><h3>Plain-speak and deep jargon in one breath.</h3><p>"Tensor parallel" and "give me the real poop" in the same sentence. Never corporate-neutral.</p><span class="cnt">no middle register found</span></div>
+    <div class="rule"><h3>Physical verbs for digital things.</h3><p>"Make the GPU sing", "bake off", "full send", "buttoned up".</p><span class="cnt">"sing" 80×</span></div>
+    <div class="rule"><h3>Emotion in words, not punctuation.</h3><p>Enthusiasm is a CAPS burst and visceral slang. Frustration is profanity and a direct question.</p><span class="cnt">15% CAPS bursts · 0.06 ! per msg</span></div>
+    <div class="rule"><h3>Outcome first, cost aware.</h3><p>What it does, what it costs in time, what is next. "It took 45 minutes last time."</p><span class="cnt">numbers beat adjectives</span></div>
+    <div class="rule"><h3>Ownership voice.</h3><p>My lab, my machines, and the machines have names. First person, possessive, no passive voice.</p><span class="cnt">every node named</span></div>
+  </div>
+</section>
+
+<section id="ban" class="reveal">
+  <h2><span class="n">06</span>The ban list</h2>
+  <p class="lede">Grep the draft for these. One hit means rewrite. Hover to strike them.</p>
+  <div class="ban" id="ban">
+    <span>furthermore</span><span>delve</span><span>tapestry</span><span>testament</span><span>foster</span><span>moreover</span><span>in conclusion</span><span>game-changer</span><span>seamless</span><span>holistic</span><span>paradigm</span><span>leverage</span><span>robust</span><span>em-dash chains</span><span>Here's the thing</span><span>numbered emoji lists</span><span>The takeaway</span><span>In today's world</span><span>tricolon flourishes</span><span>any emoji</span>
+  </div>
+  <div class="three">
+    <div class="card"><h3>Tier 2: season, don't saturate</h3><p>Hard interrupts like "Wait / STOP / Before" when stakes are high. Numbered lists only when answering someone else's menu. Profanity is 15% in private chat and dials to zero-to-mild in public.</p></div>
+    <div class="card"><h3>Rejected after verification</h3><p>Heavy exclamation points (0.06 per message). Emoji bullets. Formal transitions and topic sentences. All three were tempting, none survived the count.</p></div>
+    <div class="card"><h3>One branded exception</h3><p>For published social posts only: the bee badge may close the post and two to four plain hashtags may ride along for reach. That is branding, not voice. Everything else in the emoji rule stands.</p></div>
+  </div>
+</section>
+
+<section id="does" class="reveal">
+  <h2><span class="n">07</span>What the skill does when you call it</h2>
+  <p class="lede">The skill is the applicator. The standard is the law. If they ever disagree, the standard wins.</p>
+  <div class="three">
+    <div class="card hex"><h3>1. Load</h3><p>Reads the standard fresh on every invocation. Rules, seasonings, ban list, litmus. Never from memory, so an edit to the standard is live on the next call.</p></div>
+    <div class="card"><h3>2. Draft</h3><p>Writes in the voice: short sentences, mid-conversation opener, Also as the connector, numbers over adjectives, physical verbs, machines by name, zero emoji, emotion in words.</p></div>
+    <div class="card"><h3>3. Register check</h3><p>Same voice, different dial per destination. LinkedIn: profanity to zero or mild. X: one mild if it earns it. Internal chat: full natural register.</p></div>
+    <div class="card"><h3>4. Litmus</h3><p>Mandatory before delivery. Five checks, all must pass. A draft that fails goes back to step 2, it does not go to the human.</p></div>
+    <div class="card"><h3>5. Deliver</h3><p>Draft to the clipboard or a file, character count noted for X. The human reads, edits on the fly, and posts. The skill never posts anything itself.</p></div>
+    <div class="card"><h3>Anti-drift</h3><p>If the draft "sounds smart", it failed. If any sentence could open a consulting deck, delete it. When unsure whether a phrase is him, grep the corpus. If its shape is not in there, it probably is not him.</p></div>
+  </div>
+</section>
+
+<section id="litmus" class="reveal">
+  <h2><span class="n">08</span>The litmus test</h2>
+  <p class="lede">Runs on every draft. Scroll and watch it pass.</p>
+  <div class="litmus" id="litmus">
+    <div class="check"><div class="box"></div><div><b>One breath per sentence</b><span>Read each sentence aloud. If it cannot be said in one breath, split it.</span></div></div>
+    <div class="check"><div class="box"></div><div><b>Zero hits on the ban list</b><span>Grep for the banned words, emoji and em-dashes. Any hit means rewrite, not patch.</span></div></div>
+    <div class="check"><div class="box"></div><div><b>At least one direct question</b><span>To the reader. A command wearing a question mark counts.</span></div></div>
+    <div class="check"><div class="box"></div><div><b>Every claim carries a figure</b><span>Numbers beat adjectives. "45 minutes" beats "quick".</span></div></div>
+    <div class="check"><div class="box"></div><div><b>Ends on something practical</b><span>What he did, or what you should do. Never an abstraction.</span></div></div>
+  </div>
+</section>
+
+<section id="dest" class="reveal">
+  <h2><span class="n">09</span>One voice, three dials</h2>
+  <div class="dest">
+    <div class="card"><h3>Internal chat</h3><p>Full natural register. Profanity allowed. Hard interrupts allowed.</p><div class="meter"><span style="--w:100%"></span></div><div class="meter-k">register 100%</div></div>
+    <div class="card"><h3>X</h3><p>Same voice. One mild word if it earns it. Character count noted on delivery.</p><div class="meter"><span style="--w:55%"></span></div><div class="meter-k">register 55%</div></div>
+    <div class="card"><h3>LinkedIn</h3><p>Same voice. Profanity to zero or "hell of a". Still no thesis openers, still no emoji.</p><div class="meter"><span style="--w:25%"></span></div><div class="meter-k">register 25%</div></div>
+  </div>
+</section>
+
+<section id="try" class="reveal">
+  <h2><span class="n">10</span>Before and after</h2>
+  <p class="lede">Same facts. One passes the litmus, one does not.</p>
+  <div class="ba">
+    <div class="card"><div class="tag bad">default model voice</div>
+      <blockquote>In today's rapidly evolving AI landscape, I'm thrilled to share that our homelab cluster has achieved a significant milestone. By leveraging a robust three-node architecture, we've unlocked seamless inference on a 744B parameter model. This is truly a testament to what's possible with local-first infrastructure. 🚀🐝 #AI #Innovation #Homelab #Leadership</blockquote>
+      <div class="why"><em>5 ban-list hits</em>, two emoji, a hashtag wall, zero numbers that matter, zero questions, opens with a thesis.</div>
+    </div>
+    <div class="card"><div class="tag good">/myvoice</div>
+      <blockquote>Okay so a 744B model is running on three boxes in my apartment. 7 tokens a second across a USB4 link and one LAN hop. Took two weekends and one tripped breaker. Also it idles at 300 watts, which is less than the old dual-GPU rig alone. Anyone else splitting a model this big at home? Numbers and the wiring are in the repo.</blockquote>
+      <div class="why">Mid-conversation opener. Five real figures. One question. Ends on where to look. Nothing on the ban list.</div>
+    </div>
+  </div>
+</section>
+
+<section id="reuse" class="reveal">
+  <h2><span class="n">11</span>Make your own</h2>
+  <p class="lede">Nothing here is specific to one person except the corpus. The method is the product.</p>
+  <div class="three">
+    <div class="card"><h3>Export your messages</h3><p>Any chat log you own. Keep them verbatim, keep the typos, one delimiter between messages. A month is plenty. A thousand messages is enough to count on.</p></div>
+    <div class="card"><h3>Run three analysts blind</h3><p>Send the same forensic prompt to three different models. Do not let them see each other. Ask for quotes as evidence and numbered sections so you can line them up.</p></div>
+    <div class="card"><h3>Keep only what counts</h3><p>A rule goes in when all three agree and a grep over the full corpus gives it a number. Record the rejects too. Then point your assistant at the standard, every run, and make it pass the litmus before it hands you a draft.</p></div>
+  </div>
+</section>
+
+<footer>
+  <img src="hive-ai-bee-badge.png" alt="Hive AI">
+  <div>
+    <div><b>Hive AI</b> · an independent AI lab building local-first agentic systems</div>
+    <div class="mono">/myvoice · standard built 2026-08-30 · consensus of three analysts over 2,004 messages · the skill reads the standard, the standard is the law</div>
+  </div>
+</footer>
+
+</div>
+
+<script>
+/* reveal on scroll */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* counters */
+const cio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target,end=parseFloat(el.dataset.count),dec=parseInt(el.dataset.dec||'0');const t0=performance.now(),d=1400;const step=t=>{const p=Math.min(1,(t-t0)/d),v=end*(1-Math.pow(1-p,3));el.textContent=dec?v.toFixed(dec):Math.round(v).toLocaleString();if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step);cio.unobserve(el)}),{threshold:.6});
+document.querySelectorAll('[data-count]').forEach(el=>cio.observe(el));
+
+/* litmus ticks */
+const lio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;[...e.target.querySelectorAll('.check')].forEach((c,i)=>setTimeout(()=>c.classList.add('on'),350*i+200));lio.unobserve(e.target)}),{threshold:.4});
+document.querySelectorAll('#litmus').forEach(el=>lio.observe(el));
+
+/* ban list auto-strike once, then hover takes over */
+const bio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const b=e.target;b.classList.add('auto');[...b.children].forEach((s,i)=>setTimeout(()=>s.classList.add('x'),90*i+300));setTimeout(()=>{b.classList.remove('auto');[...b.children].forEach(s=>s.classList.remove('x'))},90*b.children.length+2600);bio.unobserve(b)}),{threshold:.5});
+document.querySelectorAll('#ban').forEach(el=>bio.observe(el));
+
+/* terminal typewriter */
+const lines=[
+ ['p','$ /myvoice  "post about the three-box run"'],
+ ['c','loading standard ... 12 tier-1 rules, 20 banned phrases, 5 litmus checks'],
+ ['c','drafting ...'],
+ ['bad','In today\'s rapidly evolving AI landscape, I\'m thrilled to share'],
+ ['c','litmus: thesis opener, 2 ban hits, 0 questions, 0 figures  >>  REJECT'],
+ ['c','redrafting ...'],
+ ['ok','Okay so a 744B model is running on three boxes in my apartment.'],
+ ['ok','7 tokens a second across a USB4 link and one LAN hop.'],
+ ['ok','Anyone else splitting a model this big at home?'],
+ ['c','litmus: one breath / 0 ban hits / 1 question / 5 figures / ends practical  >>  PASS'],
+ ['p','$ copied to clipboard. 281 chars. your move.']
+];
+const term=document.getElementById('term');
+let li=0,ci=0;const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function type(){
+  if(li>=lines.length){term.innerHTML+='<span class="cursor"></span>';return}
+  const [cls,txt]=lines[li];
+  if(ci===0){const s=document.createElement('span');s.className=cls;s.id='l'+li;term.appendChild(s);term.appendChild(document.createTextNode('\n'))}
+  const s=document.getElementById('l'+li);
+  if(reduce){s.textContent=txt;li++;ci=0;return type()}
+  s.textContent=txt.slice(0,++ci);
+  if(ci>=txt.length){li++;ci=0;setTimeout(type,cls==='c'?260:520)}else setTimeout(type,cls==='c'?9:22)
+}
+setTimeout(type,500);
+</script>
+</body>
+</html>
